@@ -8,24 +8,21 @@ namespace QuoteOfTheDayAddIn.Tests
 {
     public class FakeResponseHandler : DelegatingHandler
     {
-        private readonly Dictionary<Uri, HttpResponseMessage> _FakeResponses = new Dictionary<Uri, HttpResponseMessage>();
-
         public void AddFakeResponse(Uri uri, HttpResponseMessage responseMessage)
         {
-            _FakeResponses.Add(uri, responseMessage);
+            _fakeResponses.Add(uri, responseMessage);
         }
 
-        protected async override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, System.Threading.CancellationToken cancellationToken)
         {
-            if (_FakeResponses.ContainsKey(request.RequestUri))
+            if (_fakeResponses.ContainsKey(request.RequestUri))
             {
-                return _FakeResponses[request.RequestUri];
-            }
-            else
-            {
-                return new HttpResponseMessage(HttpStatusCode.NotFound) { RequestMessage = request };
+                return Task.FromResult(_fakeResponses[request.RequestUri]);
             }
 
+            return Task.FromResult(new HttpResponseMessage(HttpStatusCode.NotFound) { RequestMessage = request });
         }
+
+        private readonly Dictionary<Uri, HttpResponseMessage> _fakeResponses = new Dictionary<Uri, HttpResponseMessage>();
     }
 }
